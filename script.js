@@ -2,6 +2,12 @@ document.getElementById('year').textContent = new Date().getFullYear();
 const viewer = document.getElementById('viewer');
 const toggle = document.querySelector('.menu-toggle');
 const header = document.querySelector('header');
+document.querySelector('.skip-link').addEventListener('click', event => {
+  event.preventDefault();
+  const main = document.getElementById('main-content');
+  main.focus({ preventScroll: true });
+  main.scrollIntoView({ behavior: 'instant' });
+});
 let photos = [];
 let index = 0;
 function renderPhoto() {
@@ -90,7 +96,7 @@ const pages = {
   faq: 'FAQs',
   contact: 'Contact',
 };
-function showPage() {
+function showPage(event) {
   const requested = location.hash.replace(/^#\/?/, '') || 'home';
   const page = Object.prototype.hasOwnProperty.call(pages, requested)
     ? requested
@@ -109,6 +115,13 @@ function showPage() {
   header.classList.remove('menu-open');
   toggle.setAttribute('aria-expanded', 'false');
   document.title = pages[page] + ' | Louise Adrianne Photography';
+  if (event) {
+    const heading = document.querySelector('main > section:not([hidden]) h1');
+    if (heading) {
+      heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+    }
+  }
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 window.addEventListener('hashchange', showPage);
@@ -214,9 +227,9 @@ document.getElementById('close-pricing').addEventListener('click', () => {
   pricingDialog.close();
 });
 pricingDialog.addEventListener('close', () => {
-  document.getElementById('enquiry-inline').append(enquiryForm);
+  // An old close event must not remove the form from a freshly reopened dialog.
+  if (!pricingDialog.open) document.getElementById('enquiry-inline').append(enquiryForm);
 });
 document.getElementById('hitched-enquiry').addEventListener('click', () => {
   copyEnquiry(true, 'hitched');
 });
-
